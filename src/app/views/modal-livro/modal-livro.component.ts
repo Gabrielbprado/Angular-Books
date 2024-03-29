@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { IBook } from 'src/app/Interfaces/IBook';
 
 const body = document.querySelector("body");
 
@@ -11,7 +12,7 @@ export class ModalLivroComponent {
 
   constructor() { }
 
-  @Input() livro: Object;
+  @Input() livro: IBook;
   statusModal: boolean = true;
   @Output() mudouModal = new EventEmitter()
 
