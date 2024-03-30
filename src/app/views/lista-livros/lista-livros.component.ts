@@ -31,15 +31,16 @@ export class ListaLivrosComponent implements OnDestroy {
     const book: IBook[] = [];
     
     data.forEach(data => {
+      const convert = data.volumeInfo;
       book.push(this.Book = 
         {
-          title: data.volumeInfo?.title,
-          authors: data.volumeInfo?.authors,
-          publisher: data.volumeInfo?.publisher,
-          publishedDate: data.volumeInfo?.publishedDate,
-          description: data.volumeInfo?.description,
-          previewLink: data.volumeInfo?.previewLink,
-          thumbnail: data.volumeInfo?.imageLinks?.thumbnail
+          title: convert?.title,
+          authors: convert?.authors,
+          publisher: convert?.publisher,
+          publishedDate: convert?.publishedDate,
+          description: convert?.description,
+          previewLink: convert?.previewLink,
+          thumbnail: convert?.imageLinks?.thumbnail
         })
     });
     return book;
