@@ -1,53 +1,51 @@
 import { Component, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { FormControl } from '@angular/forms';
+import { Subscription, debounceTime, filter, map, switchMap } from 'rxjs';
 import { IBook } from 'src/app/Interfaces/IBook';
 import { BookServiceService } from 'src/app/services/book-service.service';
 
+const STOP = 400;
 @Component({
   selector: 'app-lista-livros',
   templateUrl: './lista-livros.component.html',
   styleUrls: ['./lista-livros.component.css']
 })
-export class ListaLivrosComponent implements OnDestroy {
+export class ListaLivrosComponent {
 
-  listaLivros: IBook[];
   Book: IBook;
-  subscription: Subscription;
-  NameBook: string = '';
+  NameBook = new FormControl();
 
   constructor(private service: BookServiceService) { }
+
+  findBook$ = this.NameBook.valueChanges.pipe(
+    debounceTime(STOP),
+   filter(value => value.length > 3),
+   switchMap((value) => this.service.getBooks(value)),
+   map(data => this.ConvertItem(data))
+  )
   
-  searchBook() {
-    this.subscription = this.service.getBooks(this.NameBook).subscribe( {
-      next: (data) =>
-      {
-       this.listaLivros = this.ConvertItem(data);
-      }
-    });
-  }
-  
+
   ConvertItem(data) : IBook[]
   {
     const book: IBook[] = [];
     
     data.forEach(data => {
+      const convert = data.volumeInfo;
       book.push(this.Book = 
         {
-          title: data.volumeInfo?.title,
-          authors: data.volumeInfo?.authors,
-          publisher: data.volumeInfo?.publisher,
-          publishedDate: data.volumeInfo?.publishedDate,
-          description: data.volumeInfo?.description,
-          previewLink: data.volumeInfo?.previewLink,
-          thumbnail: data.volumeInfo?.imageLinks?.thumbnail
+          title: convert?.title,
+          authors: convert?.authors,
+          publisher: convert?.publisher,
+          publishedDate: convert?.publishedDate,
+          description: convert?.description,
+          previewLink: convert?.previewLink,
+          thumbnail: convert?.imageLinks?.thumbnail
         })
     });
     return book;
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-  }
+
 
 }
 
