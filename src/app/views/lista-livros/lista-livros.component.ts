@@ -1,31 +1,30 @@
 import { Component, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { FormControl } from '@angular/forms';
+import { Subscription, debounceTime, filter, map, switchMap } from 'rxjs';
 import { IBook } from 'src/app/Interfaces/IBook';
 import { BookServiceService } from 'src/app/services/book-service.service';
 
+const STOP = 400;
 @Component({
   selector: 'app-lista-livros',
   templateUrl: './lista-livros.component.html',
   styleUrls: ['./lista-livros.component.css']
 })
-export class ListaLivrosComponent implements OnDestroy {
+export class ListaLivrosComponent {
 
-  listaLivros: IBook[];
   Book: IBook;
-  subscription: Subscription;
-  NameBook: string = '';
+  NameBook = new FormControl();
 
   constructor(private service: BookServiceService) { }
+
+  findBook$ = this.NameBook.valueChanges.pipe(
+    debounceTime(STOP),
+   filter(value => value.length > 3),
+   switchMap((value) => this.service.getBooks(value)),
+   map(data => this.ConvertItem(data))
+  )
   
-  searchBook() {
-    this.subscription = this.service.getBooks(this.NameBook).subscribe( {
-      next: (data) =>
-      {
-       this.listaLivros = this.ConvertItem(data);
-      }
-    });
-  }
-  
+
   ConvertItem(data) : IBook[]
   {
     const book: IBook[] = [];
@@ -46,9 +45,7 @@ export class ListaLivrosComponent implements OnDestroy {
     return book;
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-  }
+
 
 }
 
