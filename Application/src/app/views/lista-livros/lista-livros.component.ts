@@ -1,6 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { Subscription, debounceTime, filter, map, switchMap } from 'rxjs';
+import { EMPTY, Subscription, catchError, debounceTime, distinctUntilChanged, filter, map, switchMap, throwError } from 'rxjs';
 import { IBook } from 'src/app/Interfaces/IBook';
 import { BookServiceService } from 'src/app/services/book-service.service';
 
@@ -14,14 +14,22 @@ export class ListaLivrosComponent {
 
   Book: IBook;
   NameBook = new FormControl();
+  ErrorMessage = '';
 
   constructor(private service: BookServiceService) { }
 
   findBook$ = this.NameBook.valueChanges.pipe(
     debounceTime(STOP),
-   filter(value => value.length > 3),
-   switchMap((value) => this.service.getBooks(value)),
-   map(data => this.ConvertItem(data))
+   filter(value => value.length >= 3),
+   distinctUntilChanged(),
+   switchMap((value) => 
+    this.service.getBooks(value),
+  ),
+   map(data => this.ConvertItem(data)),
+   catchError(() => {
+    this.ErrorMessage = 'Ops Ocorreu um Erro';
+    return EMPTY;
+})
   )
   
 
