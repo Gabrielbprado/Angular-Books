@@ -16,7 +16,7 @@ export class BookServiceService {
 
     const params = new HttpParams().append('q', NameBook);
     return this.http.get<IResultBook>(this.API, {params}).pipe(
-      map(data =>  data.items)
+      map(data =>  data.items ?? [])
       );
   }
 }
